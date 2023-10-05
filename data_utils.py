@@ -6,20 +6,30 @@ from datasets import Dataset, Audio
 from transformers import Wav2Vec2FeatureExtractor
 from torch import nn
 
-from utils import load_filepaths
+from .utils import load_metadata
 
 
 class AudioLabelLoader():
-    def __init__(self, args, set_name):
-        self.args = args
-        self.set_name = set_name
+    def __init__(self, args, speaker_id=None, test_size=None, seed=45, metadata=None):
+        if speaker_id is None and metadata is None:
+            raise Exception('Either `speaker_id` or `metadata` must be not None.')
+            
+        self.path = args.common.meta_file_folder
+        self.speaker_id = speaker_id
+        self.test_size = test_size
+        self.seed = seed
+        self.metadata = metadata
     
     def get_data(self):
-        metadata = load_filepaths(
-            os.path.join(self.args.common.meta_file_folder, "{}.csv".format(self.set_name))
-        )
-        data = Dataset.from_dict(metadata).cast_column('audio', Audio())
+        if self.metadata is None:
+            self.metadata = load_metadata(self.path, self.speaker_id)
+        
+        data = Dataset.from_dict(self.metadata).cast_column('audio', Audio())
         data = data.class_encode_column('emotion')
+        
+        if self.test_size is not None:
+            data = data.train_test_split(test_size=self.test_size, seed=self.seed)
+        
         return data
 
 
