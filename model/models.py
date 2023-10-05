@@ -7,12 +7,12 @@ from transformers.models.wav2vec2.modeling_wav2vec2 import (
     Wav2Vec2Model
 )
 
-from model.modeling_output import (
+from .modeling_output import (
     SpeechClassifierOutput,
     SiameseNetworkOutput,
     HeadClassifierOutput
 )
-from model.losses import ContrastiveLoss
+from .losses import ContrastiveLoss
 
 class Wav2Vec2ClassificationHead(nn.Module):
     """Head for wav2vec2 classification task."""
@@ -119,7 +119,7 @@ class SiameseNetworkForSpeechClassification(Wav2Vec2PreTrainedModel):
             for name, param in self.wav2vec2.named_parameters():
                 param.requires_grad = False
         
-        self.contrastive_loss = ContrastiveLoss(args.siamese.margin)
+        self.contrastive_loss = ContrastiveLoss(args.siamese.margin, args.siamese.siamese_loss_mode)
 
 
     def sub_forward(

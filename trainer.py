@@ -13,12 +13,12 @@ from tqdm.auto import tqdm, trange
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
-from model.models import (
+from .model.models import (
     Wav2Vec2ForSpeechClassification,
     SiameseNetworkForSpeechClassification
 )
-from data_utils import DataCollator
-from utils import plot
+from .data_utils import DataCollator
+from .utils import plot
 
 
 class Trainer(object):
@@ -55,14 +55,14 @@ class Trainer(object):
         train_dataloader = DataLoader(self.train_dataset, 
                                     collate_fn=datacollator,
                                     batch_size=self.args.train.batch_size,
-                                    num_workers=8, 
+                                    num_workers=self.args.train.num_workers, 
                                     shuffle=True, 
                                     pin_memory=True,
                                 )
         eval_dataloader = DataLoader(self.valid_dataset, 
                                     collate_fn=datacollator,
                                     batch_size=self.args.train.batch_size,
-                                    num_workers=8, 
+                                    num_workers=self.args.train.num_workers, 
                                     shuffle=True, 
                                     pin_memory=True,
                                 )
@@ -84,7 +84,6 @@ class Trainer(object):
                     input_values = batch[0]['input_values'].to(device=self.device)
                     labels = batch[1].to(device=self.device, dtype=torch.float32)
 
-                    
                     outputs = self.model(input_values=input_values, labels=labels, return_dict=True)
                 else:
                     anchor_input = batch[0].to(device=self.device)
@@ -127,7 +126,8 @@ class Trainer(object):
                         'siamese_loss': round(mean(siamese_losses), 3),
                         'classify_loss': round(mean(classify_loss), 3),
                         'valid_loss': round(eval_loss, 3),
-                        'valid_acc': round(eval_acc, 3)
+                        'valid_acc': round(eval_acc, 3),
+                        'global_acc': round(global_acc, 3)
                     })
 
 

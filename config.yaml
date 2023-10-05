@@ -12,12 +12,14 @@ model:
 siamese:
   margin: 100.0
   coff_siamese_loss: 0.2
+  siamese_loss_mode: 'cosine' # 'cosine', 'euclid'
 
 train:
   batch_size: 32
   num_train_epochs: 1000
   use_gpu: !!bool True
   eval_step: 110
+  num_workers: 2
 
 optimizer:
   learning_rate: 1.0e-5
